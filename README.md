@@ -191,5 +191,6 @@ send_deadline_reminders_task.delay()
 
 ### 4. Personal Analytics (`/api/analytics/`)
 - `GET /api/analytics/dashboard/` - Fetch rolling consistency, completion velocity, and weekday failure volatility.
-#   T r a c k I t  
+#   T r a c k I t 
+ 
  
