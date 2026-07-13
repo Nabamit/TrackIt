@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrackIt — Task & Habit Streak Board</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Core Custom Stylesheet -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="dark-theme">
+
+    <!-- Auth Backdrop & Modals -->
+    <div id="auth-modal-overlay" class="modal-overlay active">
+        <div class="auth-card glassmorphism animate-fade-in">
+            <div class="auth-logo">
+                <i class="fa-solid fa-fire-flame-curved logo-icon"></i>
+                <h2>TrackIt</h2>
+                <p>Build habits. Break blocks. Keep the streak.</p>
+            </div>
+            
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form active">
+                <h3>Welcome Back</h3>
+                <div class="form-group">
+                    <label for="login-username"><i class="fa-solid fa-user"></i> Username</label>
+                    <input type="text" id="login-username" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password"><i class="fa-solid fa-lock"></i> Password</label>
+                    <input type="password" id="login-password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                <p class="auth-toggle-text">Don't have an account? <a href="#" id="to-register">Register here</a></p>
+            </form>
+
+            <!-- Register Form -->
+            <form id="register-form" class="auth-form">
+                <h3>Create Account</h3>
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label for="reg-username">Username</label>
+                        <input type="text" id="reg-username" placeholder="Username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-email">Email</label>
+                        <input type="email" id="reg-email" placeholder="Email (optional)">
+                    </div>
+                </div>
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label for="reg-password">Password</label>
+                        <input type="password" id="reg-password" placeholder="Password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-password-confirm">Confirm Password</label>
+                        <input type="password" id="reg-password-confirm" placeholder="Confirm" required>
+                    </div>
+                </div>
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label for="reg-timezone">Timezone</label>
+                        <select id="reg-timezone">
+                            <option value="UTC">UTC</option>
+                            <option value="America/New_York">America/New York</option>
+                            <option value="America/Los_Angeles">America/Los Angeles</option>
+                            <option value="Europe/London">Europe/London</option>
+                            <option value="Asia/Tokyo">Asia/Tokyo</option>
+                            <option value="Asia/Kolkata" selected>Asia/Kolkata</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-reset-hour">Reset Hour (24h)</label>
+                        <input type="number" id="reg-reset-hour" min="0" max="23" value="4">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+                <p class="auth-toggle-text">Already have an account? <a href="#" id="to-login">Sign in here</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Application -->
+    <div id="app-container" class="app-layout">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar glassmorphism">
+            <div class="sidebar-brand">
+                <i class="fa-solid fa-fire-flame-curved logo-icon text-gradient"></i>
+                <span class="brand-text">TrackIt</span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-item active" data-tab="dashboard">
+                    <i class="fa-solid fa-chart-line"></i> <span>Dashboard</span>
+                </a>
+                <a href="#projects" class="nav-item" data-tab="projects">
+                    <i class="fa-solid fa-folder-tree"></i> <span>Projects</span>
+                </a>
+                <a href="#tasks" class="nav-item" data-tab="tasks">
+                    <i class="fa-solid fa-list-check"></i> <span>Tasks</span>
+                </a>
+                <a href="#habits" class="nav-item" data-tab="habits">
+                    <i class="fa-solid fa-calendar-check"></i> <span>Habits</span>
+                </a>
+                <a href="#analytics" class="nav-item" data-tab="analytics">
+                    <i class="fa-solid fa-chart-pie"></i> <span>Analytics</span>
+                </a>
+                <a href="#ai-copilot" class="nav-item" data-tab="ai-copilot">
+                    <i class="fa-solid fa-robot"></i> <span>AI Copilot</span>
+                </a>
+                <a href="#profile" class="nav-item" data-tab="profile">
+                    <i class="fa-solid fa-user-gear"></i> <span>Profile</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-badge">
+                    <div class="user-avatar" id="avatar-initials">US</div>
+                    <div class="user-info-brief">
+                        <span id="user-display-name">Username</span>
+                        <span class="user-role">Productivity Pro</span>
+                    </div>
+                </div>
+                <button id="logout-btn" class="btn btn-icon-text logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="app-main">
+            
+            <!-- Global Top Bar -->
+            <header class="app-header glassmorphism">
+                <div class="header-search">
+                    <h2><span id="greeting-text">Hello</span>, <span id="header-username">User</span>! 👋</h2>
+                </div>
+                <div class="header-status">
+                    <!-- Grace Tokens -->
+                    <div class="metric-pill glassmorphism" title="Grace Tokens: Earn 1 for every 15-day streak milestone. Protects streaks automatically.">
+                        <i class="fa-solid fa-shield-halved text-teal"></i>
+                        <span>Grace Tokens: <strong id="header-tokens">0</strong>/3</span>
+                    </div>
+                    <!-- Timezone -->
+                    <div class="metric-pill glassmorphism">
+                        <i class="fa-solid fa-earth-asia text-indigo"></i>
+                        <span id="header-timezone">UTC (00:00 Reset)</span>
+                    </div>
+                    <!-- Create Action -->
+                    <button class="btn btn-primary" id="quick-create-task-btn"><i class="fa-solid fa-plus"></i> New Task</button>
+                </div>
+            </header>
+
+            <!-- Scrollable Page Wrapper -->
+            <div class="content-scroll-container">
+                
+                <!-- Toast Notification Alert -->
+                <div id="toast-container" class="toast-container"></div>
+
+                <!-- Tab Section: Dashboard -->
+                <section id="tab-dashboard" class="tab-pane active">
+                    <!-- Quick Stats -->
+                    <div class="stats-grid">
+                        <div class="stat-card glassmorphism">
+                            <div class="stat-icon bg-indigo-faded"><i class="fa-solid fa-folder-tree text-indigo"></i></div>
+                            <div class="stat-content">
+                                <h3>Projects</h3>
+                                <p class="stat-value" id="stats-projects-count">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card glassmorphism">
+                            <div class="stat-icon bg-blue-faded"><i class="fa-solid fa-list-check text-blue"></i></div>
+                            <div class="stat-content">
+                                <h3>Pending Tasks</h3>
+                                <p class="stat-value" id="stats-tasks-count">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card glassmorphism">
+                            <div class="stat-icon bg-amber-faded"><i class="fa-solid fa-fire text-amber"></i></div>
+                            <div class="stat-content">
+                                <h3>Best Streak</h3>
+                                <p class="stat-value" id="stats-streak-count">0 days</p>
+                            </div>
+                        </div>
+                        <div class="stat-card glassmorphism">
+                            <div class="stat-icon bg-teal-faded"><i class="fa-solid fa-circle-check text-teal"></i></div>
+                            <div class="stat-content">
+                                <h3>Consistency</h3>
+                                <p class="stat-value" id="stats-consistency-score">0%</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Double Column Dashboard Grid -->
+                    <div class="dashboard-grid">
+                        <!-- Left Column: Active Habits & Daily Check-In -->
+                        <div class="card glassmorphism">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fa-solid fa-fire text-gradient"></i> Daily Habits & Streaks</h3>
+                                <span class="card-subtitle">Keep check-ins alive for today</span>
+                            </div>
+                            <div class="card-body">
+                                <div id="dashboard-habits-container" class="habits-list">
+                                    <!-- Dynamic content -->
+                                    <div class="loading-state"><i class="fa-solid fa-spinner fa-spin"></i> Loading habits...</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Blocker Chains & Task Dependencies -->
+                        <div class="card glassmorphism">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fa-solid fa-lock text-red"></i> Blocker Chains & Dependencies</h3>
+                                <span class="card-subtitle">Prerequisite blockers preventing progress</span>
+                            </div>
+                            <div class="card-body">
+                                <div id="dashboard-blockers-container" class="blockers-list">
+                                    <!-- Dynamic content -->
+                                    <div class="loading-state"><i class="fa-solid fa-spinner fa-spin"></i> Analyzing blocker graphs...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tab Section: Projects -->
+                <section id="tab-projects" class="tab-pane">
+                    <div class="section-actions">
+                        <h3>Your Projects</h3>
+                        <button class="btn btn-outline" id="create-project-btn"><i class="fa-solid fa-plus"></i> Create Project</button>
+                    </div>
+                    <div class="projects-grid" id="projects-list-container">
+                        <!-- Dynamic list -->
+                    </div>
+                </section>
+
+                <!-- Tab Section: Tasks -->
+                <section id="tab-tasks" class="tab-pane">
+                    <div class="section-actions">
+                        <h3>Tasks Board</h3>
+                        <div class="filters-row">
+                            <select id="task-filter-project" class="form-control-inline">
+                                <option value="">All Projects</option>
+                            </select>
+                            <select id="task-filter-priority" class="form-control-inline">
+                                <option value="">All Priorities</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Kanban Board Columns -->
+                    <div class="kanban-board">
+                        <div class="kanban-column" id="col-pending">
+                            <div class="column-header">
+                                <span>Pending</span>
+                                <span class="column-badge" id="badge-pending">0</span>
+                            </div>
+                            <div class="kanban-cards-container" id="tasks-pending-container"></div>
+                        </div>
+                        <div class="kanban-column" id="col-in-progress">
+                            <div class="column-header">
+                                <span>In Progress</span>
+                                <span class="column-badge" id="badge-in-progress">0</span>
+                            </div>
+                            <div class="kanban-cards-container" id="tasks-in-progress-container"></div>
+                        </div>
+                        <div class="kanban-column" id="col-done">
+                            <div class="column-header">
+                                <span>Done</span>
+                                <span class="column-badge" id="badge-done">0</span>
+                            </div>
+                            <div class="kanban-cards-container" id="tasks-done-container"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tab Section: Habits -->
+                <section id="tab-habits" class="tab-pane">
+                    <div class="section-actions">
+                        <h3>Recurring Habits</h3>
+                        <button class="btn btn-primary" id="create-habit-btn"><i class="fa-solid fa-calendar-plus"></i> Add Habit</button>
+                    </div>
+                    <div class="habits-detail-grid" id="habits-detail-container">
+                        <!-- Dynamic contents -->
+                    </div>
+                </section>
+
+                <!-- Tab Section: Analytics -->
+                <section id="tab-analytics" class="tab-pane">
+                    <div class="section-title">
+                        <h3>Productivity Audit</h3>
+                        <p>Detailed performance analytics calculated from your logs.</p>
+                    </div>
+                    
+                    <div class="analytics-row">
+                        <!-- Radial Consistency Score Card -->
+                        <div class="analytics-card glassmorphism align-center">
+                            <h4>Consistency Score</h4>
+                            <span class="card-subtitle">Rolling 30-day checked-in & frozen habit days</span>
+                            
+                            <div class="radial-progress-wrapper">
+                                <svg class="radial-progress-svg" viewBox="0 0 100 100">
+                                    <circle class="circle-bg" cx="50" cy="50" r="40"></circle>
+                                    <circle class="circle-progress" id="analytics-radial-bar" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="251.2"></circle>
+                                </svg>
+                                <div class="radial-progress-label">
+                                    <span id="analytics-consistency-pct" class="percentage-val">0%</span>
+                                    <span class="label-text">Consistency</span>
+                                </div>
+                            </div>
+                            
+                            <p class="analytics-insight-text">
+                                A high consistency score implies you check in or freeze daily without letting habits slip.
+                            </p>
+                        </div>
+                        
+                        <!-- Weekday Failure Volatility -->
+                        <div class="analytics-card glassmorphism">
+                            <h4>Danger Days (Failure Volatility)</h4>
+                            <span class="card-subtitle">Which weekday are you most likely to miss habits?</span>
+                            
+                            <div class="chart-container-svg" id="analytics-danger-chart">
+                                <!-- Dynamic SVG chart representation -->
+                            </div>
+                            
+                            <div class="alert alert-info" id="danger-days-message">
+                                No streak failures recorded yet.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Speed Metrics Row -->
+                    <div class="analytics-row margin-top">
+                        <div class="stat-card glassmorphism flex-row-layout">
+                            <div class="stat-icon bg-blue-faded"><i class="fa-solid fa-gauge-high text-blue"></i></div>
+                            <div class="stat-content flex-fill">
+                                <h4>Completion Velocity</h4>
+                                <p class="stat-value text-gradient-indigo" id="analytics-velocity-hours">0.0 hrs</p>
+                                <span class="card-subtitle">Average hours elapsed from creation to marking one-off tasks as Done.</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tab Section: AI Copilot -->
+                <section id="tab-ai-copilot" class="tab-pane">
+                    <div class="copilot-layout glassmorphism">
+                        
+                        <!-- Left Panel: Chat Stream -->
+                        <div class="copilot-chat-panel">
+                            <div class="chat-header">
+                                <div class="ai-avatar"><i class="fa-solid fa-brain"></i></div>
+                                <div class="ai-title">
+                                    <h4>TrackIt Copilot</h4>
+                                    <span class="text-teal text-sm"><i class="fa-solid fa-circle fa-xs glow-dot"></i> Online</span>
+                                </div>
+                            </div>
+                            
+                            <div class="chat-messages" id="copilot-messages-container">
+                                <div class="message ai-message">
+                                    Hi there! I am your AI Copilot. How can I help you optimize your productivity today?
+                                </div>
+                            </div>
+                            
+                            <div class="chat-input-row">
+                                <select id="copilot-task-select" class="form-control-inline">
+                                    <option value="">(No specific task context)</option>
+                                </select>
+                                <input type="text" id="copilot-user-input" placeholder="Ask to 'break down this task', 'create a habit recovery plan', etc." />
+                                <button class="btn btn-primary" id="copilot-send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Panel: Recommendation Cards -->
+                        <div class="copilot-rec-panel">
+                            <h4>Quick Prompts</h4>
+                            <div class="rec-chips">
+                                <button class="rec-chip" data-prompt="Break down my currently selected task into smaller actionable subtasks.">
+                                    <i class="fa-solid fa-list-ol text-blue"></i> Decompose Task
+                                </button>
+                                <button class="rec-chip" data-prompt="Create a daily habit recovery plan since I missed check-ins recently.">
+                                    <i class="fa-solid fa-rotate-left text-amber"></i> Habit Recovery Plan
+                                </button>
+                                <button class="rec-chip" data-prompt="Explain what a blocker chain is and how circular dependency checking helps.">
+                                    <i class="fa-solid fa-shield-halved text-teal"></i> Explain Blocker Chains
+                                </button>
+                                <button class="rec-chip" data-prompt="Give me 3 tips on staying consistent on my 'danger day' of the week.">
+                                    <i class="fa-solid fa-fire-burner text-purple"></i> Overcome Danger Days
+                                </button>
+                            </div>
+                            <div class="copilot-ad-box">
+                                <i class="fa-solid fa-lightbulb text-amber bulb-icon"></i>
+                                <h5>Pro Tip</h5>
+                                <p>Select a task from the dropdown in the chat bar to provide direct context to the AI helper.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- Tab Section: Profile -->
+                <section id="tab-profile" class="tab-pane">
+                    <div class="card glassmorphism max-width-md center-block">
+                        <div class="card-header">
+                            <h3 class="card-title">User Settings</h3>
+                            <span class="card-subtitle">Configure your local parameters</span>
+                        </div>
+                        <div class="card-body">
+                            <form id="profile-settings-form">
+                                <div class="form-group">
+                                    <label for="profile-timezone">Timezone</label>
+                                    <select id="profile-timezone" class="form-control">
+                                        <option value="UTC">UTC</option>
+                                        <option value="America/New_York">America/New York</option>
+                                        <option value="America/Los_Angeles">America/Los Angeles</option>
+                                        <option value="Europe/London">Europe/London</option>
+                                        <option value="Asia/Tokyo">Asia/Tokyo</option>
+                                        <option value="Asia/Kolkata">Asia/Kolkata</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="profile-reset-hour">Reset Hour (24-hour format)</label>
+                                    <input type="number" id="profile-reset-hour" class="form-control" min="0" max="23" required>
+                                    <small class="form-hint">Streaks evaluate at this hour in your timezone.</small>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Create Task Modal -->
+    <div id="create-task-modal" class="modal-overlay">
+        <div class="modal-card glassmorphism animate-scale-up">
+            <div class="modal-header">
+                <h3 id="task-modal-title">Create New Task</h3>
+                <button class="modal-close-btn" id="close-task-modal-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="task-create-form">
+                    <input type="hidden" id="edit-task-id" />
+                    <div class="form-group">
+                        <label for="task-title">Task Title</label>
+                        <input type="text" id="task-title" placeholder="What needs to be done?" required class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="task-description">Description</label>
+                        <textarea id="task-description" placeholder="Provide some details..." class="form-control"></textarea>
+                    </div>
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label for="task-project">Project</label>
+                            <select id="task-project" class="form-control" required>
+                                <!-- Dynamic option list -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="task-type">Type</label>
+                            <select id="task-type" class="form-control">
+                                <option value="one_off">One-off Task</option>
+                                <option value="recurring">Recurring Habit</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label for="task-priority">Priority</label>
+                            <select id="task-priority" class="form-control">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="task-due-date">Due Date</label>
+                            <input type="datetime-local" id="task-due-date" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-dependency">Prerequisite Task (Blocked By)</label>
+                        <select id="task-dependency" class="form-control">
+                            <option value="">None (Not Blocked)</option>
+                            <!-- Dynamic tasks list -->
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block" id="task-submit-btn">Save Task</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Project Modal -->
+    <div id="create-project-modal" class="modal-overlay">
+        <div class="modal-card glassmorphism animate-scale-up">
+            <div class="modal-header">
+                <h3>Create New Project</h3>
+                <button class="modal-close-btn" id="close-project-modal-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="project-create-form">
+                    <div class="form-group">
+                        <label for="project-title">Project Title</label>
+                        <input type="text" id="project-title" placeholder="Project name" required class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="project-description">Description</label>
+                        <textarea id="project-description" placeholder="Project goals..." class="form-control"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Create Project</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core SPA Javascript -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
